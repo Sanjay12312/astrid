@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
-import 'components/landing_page.dart';
-import 'components/games_page.dart';
-import 'components/tournaments_page.dart';
-import 'components/user_login_page.dart';
+import 'login_page.dart';
+import 'appwrite_client.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(GroupGamingApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class GroupGamingApp extends StatelessWidget {
+  const GroupGamingApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Game Hub',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const LandingPage(),
+      title: 'Group Gaming',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: LoginPage(
+        client: appwriteClient,
+      ), // The login page is your app's entry point.
     );
   }
 }
