@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "418160981408",
+    "project_id": "astrid-a86e1",
+    "storage_bucket": "astrid-a86e1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:418160981408:android:bb6764bbd58034133660c5",
+        "android_client_info": {
+          "package_name": "com.example.gamegroup"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBP_cQ1Iu2H_gFGezG4KrACwp_xm6vYD7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
