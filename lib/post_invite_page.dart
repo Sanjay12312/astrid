@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
-import 'appwrite_client.dart';
+import 'appwrite_client.dart'; // Ensure this file correctly initializes Appwrite
 
 class PostInvitePage extends StatefulWidget {
   const PostInvitePage({Key? key}) : super(key: key);
@@ -16,6 +16,10 @@ class _PostInvitePageState extends State<PostInvitePage> {
   final TextEditingController _playersController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   late Databases databases;
+
+  // 🔹 Replace with your actual database & collection IDs
+  final String databaseId = '67d260270026140252d0';
+  final String collectionId = '67dc5d7a00342ae4e24a';
 
   @override
   void initState() {
@@ -35,12 +39,14 @@ class _PostInvitePageState extends State<PostInvitePage> {
     if (_formKey.currentState!.validate()) {
       try {
         await databases.createDocument(
-          databaseId: 'YOUR_DATABASE_ID',
-          collectionId: 'YOUR_COLLECTION_ID',
+          databaseId: databaseId,
+          collectionId: collectionId,
           documentId: ID.unique(),
           data: {
             'game': _gameController.text.trim(),
-            'players_needed': _playersController.text.trim(),
+            'players_needed': int.parse(
+              _playersController.text.trim(),
+            ), // Convert to int
             'description': _descriptionController.text.trim(),
             'timestamp': DateTime.now().toIso8601String(),
           },
@@ -72,24 +78,25 @@ class _PostInvitePageState extends State<PostInvitePage> {
               TextFormField(
                 controller: _gameController,
                 decoration: const InputDecoration(labelText: 'Game Name'),
-                validator: (value) =>
-                    value!.isEmpty ? 'Enter a game name' : null,
+                validator:
+                    (value) => value!.isEmpty ? 'Enter a game name' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _playersController,
                 decoration: const InputDecoration(labelText: 'Players Needed'),
                 keyboardType: TextInputType.number,
-                validator: (value) =>
-                    value!.isEmpty ? 'Enter number of players' : null,
+                validator:
+                    (value) =>
+                        value!.isEmpty ? 'Enter number of players' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
                 maxLines: 3,
-                validator: (value) =>
-                    value!.isEmpty ? 'Enter a description' : null,
+                validator:
+                    (value) => value!.isEmpty ? 'Enter a description' : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
