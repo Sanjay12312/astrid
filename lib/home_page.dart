@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'login_page.dart';
 import 'room_list_page.dart';
+import 'post_invite_page.dart'; // Import PostInvitePage
 
 class HomePage extends StatefulWidget {
   final Client client;
@@ -30,7 +31,6 @@ class _HomePageState extends State<HomePage> {
     try {
       final user = await account.get();
       setState(() {
-        // Prefer name, fallback to email
         userName = user.name.isNotEmpty ? user.name : user.email;
         isLoading = false;
       });
@@ -107,6 +107,16 @@ class _HomePageState extends State<HomePage> {
           });
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const PostInvitePage()),
+          );
+        },
+        child: const Icon(Icons.add),
+        tooltip: 'Post Game Invite',
+      ),
     );
   }
 }
@@ -115,7 +125,6 @@ class _HomePageState extends State<HomePage> {
 class ActivitiesPage extends StatelessWidget {
   const ActivitiesPage({Key? key}) : super(key: key);
 
-  // Sample, hardcoded list of activities.
   final List<String> activities = const [
     'Group Chat',
     'Team Match',
@@ -136,13 +145,11 @@ class ActivitiesPage extends StatelessWidget {
             child: ListTile(
               title: Text(activities[index]),
               onTap: () {
-                // Navigate to the RoomListPage for the selected activity.
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            RoomListPage(optionName: activities[index]),
+                    builder: (context) =>
+                        RoomListPage(optionName: activities[index]),
                   ),
                 );
               },
@@ -158,13 +165,13 @@ class ActivitiesPage extends StatelessWidget {
 class GamingPage extends StatelessWidget {
   const GamingPage({Key? key}) : super(key: key);
 
-  // Sample, hardcoded list of games.
   final List<String> games = const [
     'Online Battle Arena',
     'Role-Playing Game',
     'Strategy Game',
     'Puzzle Game',
   ];
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -178,12 +185,11 @@ class GamingPage extends StatelessWidget {
             child: ListTile(
               title: Text(games[index]),
               onTap: () {
-                // Navigate to the RoomListPage for the selected activity.
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder:
-                        (context) => RoomListPage(optionName: games[index]),
+                    builder: (context) =>
+                        RoomListPage(optionName: games[index]),
                   ),
                 );
               },
