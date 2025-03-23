@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
-import 'appwrite_client.dart'; // Ensure this file correctly initializes Appwrite
+import 'appwrite_client.dart';
 
 class PostInvitePage extends StatefulWidget {
   const PostInvitePage({Key? key}) : super(key: key);
@@ -12,42 +12,58 @@ class PostInvitePage extends StatefulWidget {
 
 class _PostInvitePageState extends State<PostInvitePage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _gameController = TextEditingController();
   final TextEditingController _playersController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _linkController = TextEditingController();
   late Databases databases;
+  late Account account;
 
-  // 🔹 Replace with your actual database & collection IDs
   final String databaseId = '67d260270026140252d0';
   final String collectionId = '67dc5d7a00342ae4e24a';
+
+  final List<String> _games = [
+    "Call of Duty",
+    "PUBG",
+    "Valorant",
+    "League of Legends",
+    "Clash Royale",
+    "Among Us",
+    "Chess",
+    "Ludo",
+  ];
+
+  String _selectedGame = "Call of Duty";
 
   @override
   void initState() {
     super.initState();
     databases = Databases(appwriteClient);
+    account = Account(appwriteClient);
   }
 
   @override
   void dispose() {
-    _gameController.dispose();
     _playersController.dispose();
-    _descriptionController.dispose();
+    _linkController.dispose();
     super.dispose();
   }
 
   Future<void> _postInvite() async {
     if (_formKey.currentState!.validate()) {
       try {
+        final user = await account.get();
+        String username = user.name;
+        String userId = user.$id;
+
         await databases.createDocument(
           databaseId: databaseId,
           collectionId: collectionId,
           documentId: ID.unique(),
           data: {
-            'game': _gameController.text.trim(),
-            'players_needed': int.parse(
-              _playersController.text.trim(),
-            ), // Convert to int
-            'description': _descriptionController.text.trim(),
+            'game': _selectedGame,
+            'players_needed': int.parse(_playersController.text.trim()),
+            'join_link': _linkController.text.trim(),
+            'username': username,
+            'user_id': userId, // Store user ID
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
@@ -75,11 +91,21 @@ class _PostInvitePageState extends State<PostInvitePage> {
           key: _formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: _gameController,
-                decoration: const InputDecoration(labelText: 'Game Name'),
-                validator:
-                    (value) => value!.isEmpty ? 'Enter a game name' : null,
+              DropdownButtonFormField<String>(
+                value: _selectedGame,
+                decoration: const InputDecoration(labelText: 'Select Game'),
+                items:
+                    _games.map((String game) {
+                      return DropdownMenuItem<String>(
+                        value: game,
+                        child: Text(game),
+                      );
+                    }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedGame = value!;
+                  });
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(
@@ -92,11 +118,16 @@ class _PostInvitePageState extends State<PostInvitePage> {
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description'),
-                maxLines: 3,
+                controller: _linkController,
+                decoration: const InputDecoration(
+                  labelText: 'Join Link/Team Link',
+                ),
+                keyboardType: TextInputType.url,
                 validator:
-                    (value) => value!.isEmpty ? 'Enter a description' : null,
+                    (value) =>
+                        value!.isEmpty
+                            ? 'Enter a valid join link or team link'
+                            : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
