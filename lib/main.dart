@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login_page.dart';
-import 'appwrite_client.dart';
+import 'appwrite_client.dart'; // Ensure this file correctly initializes appwriteClient
 
 void main() {
   runApp(GroupGamingApp());
@@ -14,9 +14,7 @@ class GroupGamingApp extends StatelessWidget {
     return MaterialApp(
       title: 'Group Gaming',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: LoginPage(
-        client: appwriteClient,
-      ), // The login page is your app's entry point.
+      home: LoginPage(client: appwriteClient), // Ensure LoginPage expects this
     );
   }
 }

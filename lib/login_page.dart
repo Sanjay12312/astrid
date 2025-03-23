@@ -47,11 +47,9 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         // If the session is created successfully, navigate to the HomePage.
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => HomePage(client: widget.client),
-          ),
-        );
+        Navigator.of(
+          context,
+        ).pushReplacement(MaterialPageRoute(builder: (context) => HomePage()));
       } on AppwriteException catch (e) {
         // If Appwrite returns an error, display it.
         ScaffoldMessenger.of(context).showSnackBar(
