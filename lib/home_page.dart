@@ -1,196 +1,144 @@
 import 'package:flutter/material.dart';
-import 'package:appwrite/appwrite.dart';
-import 'login_page.dart';
-import 'room_list_page.dart';
+import 'post_invite_page.dart';
+import 'game_invites_page.dart'; // Import the new invites page
 
 class HomePage extends StatefulWidget {
-  final Client client;
-
-  const HomePage({Key? key, required this.client}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  late Account account;
-  String userName = "";
-  bool isLoading = true;
-  int _currentIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    account = Account(widget.client);
-    _fetchUserInfo();
-  }
-
-  // Retrieve the current user's information from Appwrite.
-  Future<void> _fetchUserInfo() async {
-    try {
-      final user = await account.get();
-      setState(() {
-        // Prefer name, fallback to email
-        userName = user.name.isNotEmpty ? user.name : user.email;
-        isLoading = false;
-      });
-    } on AppwriteException catch (e) {
-      print('Error fetching user info: ${e.message}');
-      setState(() {
-        userName = "Unknown";
-        isLoading = false;
-      });
-    } catch (e) {
-      print('Unexpected error: $e');
-      setState(() {
-        userName = "Error";
-        isLoading = false;
-      });
-    }
-  }
-
-  // Delete the current session to log out.
-  Future<void> _logout() async {
-    try {
-      await account.deleteSession(sessionId: 'current');
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (context) => LoginPage(client: widget.client),
-        ),
-        (route) => false,
-      );
-    } on AppwriteException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? 'Logout failed.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  // Returns the current page based on the selected bottom navigation index.
-  Widget _getCurrentPage() {
-    switch (_currentIndex) {
-      case 0:
-        return const ActivitiesPage();
-      case 1:
-        return const GamingPage();
-      default:
-        return const Center(child: Text("Invalid Page"));
-    }
-  }
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title:
-            isLoading ? const Text('Loading...') : Text('Welcome, $userName!'),
-        actions: [
-          IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
-        ],
-      ),
-      body: _getCurrentPage(),
+      appBar: AppBar(title: const Text("Astrid")),
+      body: _selectedIndex == 0 ? _buildtournamentPage() : _buildGamingPage(),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Activities'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.videogame_asset),
-            label: 'Gaming',
-          ),
-        ],
+        currentIndex: _selectedIndex,
         onTap: (index) {
           setState(() {
-            _currentIndex = index;
+            _selectedIndex = index;
           });
         },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: "Tournaments",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.videogame_asset),
+            label: "Gaming",
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const PostInvitePage()),
+          );
+        },
+        child: const Icon(Icons.add), // "+" icon
       ),
     );
   }
-}
 
-// Page that displays the list of available activities.
-class ActivitiesPage extends StatelessWidget {
-  const ActivitiesPage({Key? key}) : super(key: key);
-
-  // Sample, hardcoded list of activities.
-  final List<String> activities = const [
-    'Group Chat',
-    'Team Match',
-    'Tournament',
-    'Practice Session',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ListView.builder(
-        itemCount: activities.length,
-        itemBuilder: (context, index) {
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            child: ListTile(
-              title: Text(activities[index]),
-              onTap: () {
-                // Navigate to the RoomListPage for the selected activity.
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) =>
-                            RoomListPage(optionName: activities[index]),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+  Widget _buildtournamentPage() {
+    return const Center(
+      child: Text(
+        "Tournament Section",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }
-}
 
-// Page that displays the list of available gaming options.
-class GamingPage extends StatelessWidget {
-  const GamingPage({Key? key}) : super(key: key);
+  Widget _buildGamingPage() {
+    return _buildGameSelectionPage();
+  }
 
-  // Sample, hardcoded list of games.
-  final List<String> games = const [
-    'Online Battle Arena',
-    'Role-Playing Game',
-    'Strategy Game',
-    'Puzzle Game',
-  ];
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: ListView.builder(
-        itemCount: games.length,
-        itemBuilder: (context, index) {
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.symmetric(vertical: 4),
-            child: ListTile(
-              title: Text(games[index]),
-              onTap: () {
-                // Navigate to the RoomListPage for the selected activity.
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder:
-                        (context) => RoomListPage(optionName: games[index]),
-                  ),
-                );
-              },
+  Widget _buildGameSelectionPage() {
+    final List<Map<String, String>> games = [
+      {"name": "Call of Duty", "image": "assets/cod.jpg"},
+      {"name": "PUBG", "image": "assets/pubg.jpg"},
+      {"name": "Clash Royale", "image": "assets/clash_royale.jpg"},
+      {"name": "League of Legends", "image": "assets/league_of_legends.jpg"},
+      {"name": "Among Us", "image": "assets/among_us.jpg"},
+      {"name": "Valorant", "image": "assets/valorant.jpg"},
+      {"name": "Chess", "image": "assets/chess.jpg"},
+      {"name": "Ludo", "image": "assets/ludo.jpg"},
+    ];
+
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            "Select a Game",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: GridView.builder(
+            itemCount: games.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 6,
+              mainAxisSpacing: 6,
+              childAspectRatio: 1.1,
             ),
-          );
-        },
-      ),
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) =>
+                              GameInvitesPage(gameName: games[index]["name"]!),
+                    ),
+                  );
+                },
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 80,
+                        width: double.infinity,
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(10),
+                          ),
+                          child: Image.asset(
+                            games[index]["image"]!,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        games[index]["name"]!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
