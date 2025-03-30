@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'post_invite_page.dart';
-import 'game_invites_page.dart'; // Import the new invites page
+import 'game_invites_page.dart';
+import 'tournaments_page.dart'; // Import the TournamentsPage file
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,7 +17,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Astrid")),
-      body: _selectedIndex == 0 ? _buildtournamentPage() : _buildGamingPage(),
+      body:
+          _selectedIndex == 0
+              ? TournamentPage() // Navigate to TournamentsPage for tournaments
+              : _buildGamingPage(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -43,15 +47,6 @@ class _HomePageState extends State<HomePage> {
           );
         },
         child: const Icon(Icons.add), // "+" icon
-      ),
-    );
-  }
-
-  Widget _buildtournamentPage() {
-    return const Center(
-      child: Text(
-        "Tournament Section",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
       ),
     );
   }
