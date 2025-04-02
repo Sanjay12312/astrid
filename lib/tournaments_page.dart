@@ -3,6 +3,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'appwrite_client.dart'; // Import the global client file
 import 'create_tournament_page.dart'; // Import the create tournament page
+import 'tournament_detail_page.dart'; // Import the tournament detail page
 
 class TournamentPage extends StatefulWidget {
   const TournamentPage({Key? key}) : super(key: key);
@@ -136,37 +137,39 @@ class _TournamentPageState extends State<TournamentPage> {
                         return Card(
                           elevation: 2,
                           margin: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              SizedBox(
-                                height: 150,
-                                width: double.infinity,
-                                child:
-                                    imageFileId != null
-                                        ? Image.network(
-                                          imageUrl,
-                                          fit: BoxFit.cover,
-                                        )
-                                        : const Icon(Icons.image_not_supported),
+                          child: ListTile(
+                            leading:
+                                imageFileId != null
+                                    ? Image.network(
+                                      imageUrl,
+                                      width: 60,
+                                      height: 60,
+                                      fit: BoxFit.cover,
+                                    )
+                                    : const Icon(Icons.image_not_supported),
+                            title: Text(
+                              tournament.data['T_Name'] ?? 'Unknown Tournament',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
-                              const SizedBox(height: 8),
-                              Text(
-                                tournament.data['T_Name'] ??
-                                    'Unknown Tournament',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                            ),
+                            subtitle: Text(
+                              'Created by ${tournament.data['user_name'] ?? 'Unknown User'} on '
+                              '${DateTime.parse(tournament.data['Date']).toLocal().toString().split(' ')[0]}',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (context) => TournamentDetailPage(
+                                        tournament: tournament.data,
+                                      ),
                                 ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                tournament.data['T_Desc'] ??
-                                    'No description available.',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              const SizedBox(height: 8),
-                            ],
+                              );
+                            },
                           ),
                         );
                       },

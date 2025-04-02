@@ -18,6 +18,8 @@ class _CreateTournamentPageState extends State<CreateTournamentPage> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _registrationLinkController =
       TextEditingController();
+  final TextEditingController _gameController =
+      TextEditingController(); // Controller for game field
   late Databases databases;
   late Storage storage;
   late Account account;
@@ -120,6 +122,7 @@ class _CreateTournamentPageState extends State<CreateTournamentPage> {
             'T_Name': _nameController.text.trim(),
             'T_Desc': _descriptionController.text.trim(),
             'link': _registrationLinkController.text.trim(),
+            'game': _gameController.text.trim(), // Save game entered manually
             'imageFileId': _imageFileId, // Include imageFileId if uploaded
             'user_id': _userId, // Add user ID
             'user_name': _userName, // Add user name
@@ -145,6 +148,7 @@ class _CreateTournamentPageState extends State<CreateTournamentPage> {
     _nameController.dispose();
     _descriptionController.dispose();
     _registrationLinkController.dispose();
+    _gameController.dispose();
     super.dispose();
   }
 
@@ -170,6 +174,8 @@ class _CreateTournamentPageState extends State<CreateTournamentPage> {
                 controller: _descriptionController,
                 decoration: const InputDecoration(
                   labelText: 'Tournament Description',
+                  hintText:
+                      'Enter Details like Venue, No. of Players, Prizes, etc.',
                 ),
                 maxLines: 5, // Enable multi-line input
                 keyboardType: TextInputType.multiline,
@@ -187,6 +193,15 @@ class _CreateTournamentPageState extends State<CreateTournamentPage> {
                   hintText: 'https://example.com/register',
                 ),
                 keyboardType: TextInputType.url,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _gameController,
+                decoration: const InputDecoration(
+                  labelText: 'Game (e.g., PUBG, Valorant)',
+                ),
+                validator:
+                    (value) => value!.isEmpty ? 'Enter the game name' : null,
               ),
               const SizedBox(height: 16),
               if (!isImageUploaded) // Display upload button only if no image is uploaded
