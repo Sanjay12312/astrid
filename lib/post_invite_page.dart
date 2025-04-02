@@ -49,8 +49,18 @@ class _PostInvitePageState extends State<PostInvitePage> {
     "Indonesian",
   ];
 
+  final List<String> _servers = [
+    "Asia",
+    "NorthAmerica",
+    "SouthAmerica",
+    "Europe",
+    "MiddleEast",
+    "Australia",
+  ];
+
   String _selectedGame = "Call of Duty";
   String _selectedLanguage = "English";
+  String _selectedServer = "Asia";
 
   @override
   void initState() {
@@ -84,6 +94,7 @@ class _PostInvitePageState extends State<PostInvitePage> {
             'username': username,
             'user_id': userId, // Store user ID
             'language': _selectedLanguage, // Store selected language
+            'server': _selectedServer, // Store selected server
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
@@ -141,6 +152,23 @@ class _PostInvitePageState extends State<PostInvitePage> {
                 onChanged: (value) {
                   setState(() {
                     _selectedLanguage = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedServer,
+                decoration: const InputDecoration(labelText: 'Select Server'),
+                items:
+                    _servers.map((String server) {
+                      return DropdownMenuItem<String>(
+                        value: server,
+                        child: Text(server),
+                      );
+                    }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedServer = value!;
                   });
                 },
               ),

@@ -21,6 +21,27 @@ class _GameInvitesPageState extends State<GameInvitesPage> {
   List<Document> invites = [];
   bool isLoading = true;
   String currentUserId = '';
+  String? selectedLanguage;
+  String? selectedServer;
+  List<String> languages = [
+    'All',
+    'English',
+    'Hindi',
+    'Spanish',
+    'French',
+    'German',
+    'Chinese',
+    'Japanese',
+  ];
+  List<String> servers = [
+    'All',
+    'Asia',
+    'NorthAmerica',
+    'SouthAmerica',
+    'Europe',
+    'MiddleEast',
+    'Australia',
+  ];
 
   @override
   void initState() {
@@ -87,101 +108,188 @@ class _GameInvitesPageState extends State<GameInvitesPage> {
     }
   }
 
-  void _launchURL(String url) async {
-    if (url.isEmpty) return;
-
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Could not open link")));
-    }
+  void _showConfirmationDialog(String url) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Join Game Invite"),
+            content: Text(
+              "This invite takes you to: $url. Do you want to continue?",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("No"),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  final Uri uri = Uri.parse(url);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Could not open link")),
+                    );
+                  }
+                },
+                child: const Text("Yes"),
+              ),
+            ],
+          ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    List<Document> filteredInvites =
+        invites.where((invite) {
+          final String inviteLanguage =
+              invite.data['language']?.toString().trim() ?? '';
+          final String inviteServer =
+              invite.data['server']?.toString().trim() ?? '';
+          bool languageMatches =
+              selectedLanguage == null ||
+              selectedLanguage == 'All' ||
+              inviteLanguage == selectedLanguage;
+          bool serverMatches =
+              selectedServer == null ||
+              selectedServer == 'All' ||
+              inviteServer == selectedServer;
+          return languageMatches && serverMatches;
+        }).toList();
+
     return Scaffold(
       appBar: AppBar(title: Text(widget.gameName)),
       body:
           isLoading
               ? const Center(child: CircularProgressIndicator())
-              : invites.isEmpty
-              ? const Center(child: Text("No invites yet!"))
-              : ListView.builder(
-                itemCount: invites.length,
-                itemBuilder: (context, index) {
-                  final invite = invites[index].data;
-                  final String joinLink = invite['join_link'] ?? '';
-                  final String username = invite['username'] ?? 'Unknown';
-                  final String inviteUserId = invite['user_id'] ?? '';
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
+              : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Expanded(
-                          child: MouseRegion(
-                            onEnter: (event) => setState(() {}),
-                            onExit: (event) => setState(() {}),
-                            child: ElevatedButton(
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.resolveWith<Color>(
-                                      (states) =>
-                                          states.contains(MaterialState.hovered)
-                                              ? Colors
-                                                  .green
-                                                  .shade300 // Hover color
-                                              : Colors
-                                                  .green
-                                                  .shade600, // Default color
-                                    ),
-                                shape: MaterialStateProperty.all<
-                                  RoundedRectangleBorder
-                                >(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                elevation: MaterialStateProperty.all(4),
-                              ),
-                              onPressed:
-                                  joinLink.isNotEmpty
-                                      ? () => _launchURL(joinLink)
-                                      : null,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                child: Text(
-                                  "$username - Join - Players Needed: ${invite['players_needed']}",
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
+                        DropdownButton<String>(
+                          value: selectedLanguage,
+                          hint: const Text("Select Language"),
+                          items:
+                              languages.map((lang) {
+                                return DropdownMenuItem(
+                                  value: lang,
+                                  child: Text(lang),
+                                );
+                              }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedLanguage = value;
+                            });
+                          },
                         ),
-                        if (inviteUserId == currentUserId) ...[
-                          const SizedBox(width: 10),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _deleteInvite(invites[index].$id),
-                          ),
-                        ],
+                        DropdownButton<String>(
+                          value: selectedServer,
+                          hint: const Text("Select Server"),
+                          items:
+                              servers.map((server) {
+                                return DropdownMenuItem(
+                                  value: server,
+                                  child: Text(server),
+                                );
+                              }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedServer = value;
+                            });
+                          },
+                        ),
                       ],
                     ),
-                  );
-                },
+                  ),
+                  Expanded(
+                    child:
+                        filteredInvites.isEmpty
+                            ? const Center(child: Text("No invites yet!"))
+                            : ListView.builder(
+                              itemCount: filteredInvites.length,
+                              itemBuilder: (context, index) {
+                                final invite = filteredInvites[index].data;
+                                final String joinLink =
+                                    invite['join_link'] ?? '';
+                                final String username =
+                                    invite['username'] ?? 'Unknown';
+                                final String inviteUserId =
+                                    invite['user_id'] ?? '';
+
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          style: ButtonStyle(
+                                            backgroundColor:
+                                                MaterialStateProperty.resolveWith<
+                                                  Color
+                                                >(
+                                                  (states) =>
+                                                      states.contains(
+                                                            MaterialState
+                                                                .hovered,
+                                                          )
+                                                          ? Colors
+                                                              .green
+                                                              .shade300
+                                                          : Colors
+                                                              .green
+                                                              .shade600,
+                                                ),
+                                          ),
+                                          onPressed:
+                                              joinLink.isNotEmpty
+                                                  ? () =>
+                                                      _showConfirmationDialog(
+                                                        joinLink,
+                                                      )
+                                                  : null,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 14,
+                                            ),
+                                            child: Text(
+                                              "$username - Join - Players Needed: ${invite['players_needed']}",
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      if (inviteUserId == currentUserId)
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            color: Colors.red,
+                                          ),
+                                          onPressed:
+                                              () => _deleteInvite(
+                                                filteredInvites[index].$id,
+                                              ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                  ),
+                ],
               ),
     );
   }
