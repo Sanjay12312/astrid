@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart';
 import 'appwrite_client.dart'; // Import the global client file
@@ -63,13 +65,26 @@ class _TournamentPageState extends State<TournamentPage> {
     return '$endpoint/storage/buckets/$bucketId/files/$fileId/view?project=$projectId';
   }
 
+  void _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not open the link'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Tournaments")),
       body: Column(
         children: [
-          // Add "Hosting a Tournament?" section
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
@@ -80,7 +95,7 @@ class _TournamentPageState extends State<TournamentPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                ElevatedButton(
+                FilledButton(
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -89,18 +104,13 @@ class _TournamentPageState extends State<TournamentPage> {
                       ),
                     ).then((value) {
                       if (value == true) {
-                        _fetchTournaments(); // Refresh the tournament list
+                        _fetchTournaments();
                       }
                     });
                   },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: const Text(
                     "Create a Tournament",
@@ -111,69 +121,75 @@ class _TournamentPageState extends State<TournamentPage> {
             ),
           ),
 
-          // Render the tournament list
           Expanded(
-            child:
-                isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : tournaments.isEmpty
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : tournaments.isEmpty
                     ? const Center(
-                      child: Text(
-                        'No tournaments available.',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                    )
+                        child: Text(
+                          'No tournaments available.',
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        ),
+                      )
                     : ListView.builder(
-                      itemCount: tournaments.length,
-                      itemBuilder: (context, index) {
-                        final tournament = tournaments[index];
-                        final String? imageFileId =
-                            tournament.data['imageFileId'];
-                        final String imageUrl =
-                            imageFileId != null
-                                ? _getImageUrl(imageFileId)
-                                : '';
+                        itemCount: tournaments.length,
+                        itemBuilder: (context, index) {
+                          final tournament = tournaments[index];
+                          final String? imageFileId = tournament.data['imageFileId'];
+                          final String imageUrl = imageFileId != null ? _getImageUrl(imageFileId) : '';
+                          final String? registrationLink = tournament.data['link'];
 
-                        return Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.all(8.0),
-                          child: ListTile(
-                            leading:
-                                imageFileId != null
-                                    ? Image.network(
-                                      imageUrl,
+                          return Card(
+                            elevation: 2,
+                            margin: const EdgeInsets.all(8.0),
+                            child: ListTile(
+                              leading: imageFileId != null
+                                  ? CachedNetworkImage(
+                                      imageUrl: imageUrl,
                                       width: 60,
                                       height: 60,
                                       fit: BoxFit.cover,
+                                      placeholder: (context, url) => CircularProgressIndicator(),
+                                      errorWidget: (context, url, error) => Icon(Icons.image_not_supported),
                                     )
-                                    : const Icon(Icons.image_not_supported),
-                            title: Text(
-                              tournament.data['T_Name'] ?? 'Unknown Tournament',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(
-                              'Created by ${tournament.data['user_name'] ?? 'Unknown User'} on '
-                              '${DateTime.parse(tournament.data['Date']).toLocal().toString().split(' ')[0]}',
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => TournamentDetailPage(
-                                        tournament: tournament.data,
-                                      ),
+                                  : const Icon(Icons.image_not_supported),
+                              title: Text(
+                                tournament.data['T_Name'] ?? 'Unknown Tournament',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Created by ${tournament.data['user_name'] ?? 'Unknown User'} on '
+                                    '${DateTime.parse(tournament.data['Date']).toLocal().toString().split(' ')[0]}',
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                  if (registrationLink != null && registrationLink.isNotEmpty)
+                                    GestureDetector(
+                                      onTap: () => _launchURL(registrationLink),
+                                      child: Text(
+                                        'Register Here',
+                                        style: const TextStyle(fontSize: 14, color: Colors.blue, decoration: TextDecoration.underline),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TournamentDetailPage(tournament: tournament.data),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),

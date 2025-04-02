@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/models.dart'; // Optional, if you need to use models like User
-import 'package:appwrite/appwrite.dart'; // To access the ID helper
 
 class RegisterPage extends StatefulWidget {
   final Client client;
