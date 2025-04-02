@@ -29,8 +29,7 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         backgroundColor: Colors.transparent, // Transparent Scaffold
         appBar: AppBar(title: const Text("Astrid")),
-        body:
-            _selectedIndex == 0 ? TournamentPage() : _buildGamingPage(),
+        body: _selectedIndex == 0 ? TournamentPage() : _buildGamingPage(),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: (index) {

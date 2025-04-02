@@ -31,7 +31,36 @@ class _PostInvitePageState extends State<PostInvitePage> {
     "Ludo",
   ];
 
+  final List<String> _languages = [
+    "English",
+    "Malayalam",
+    "Hindi",
+    "Tamil",
+    "Telugu",
+    "Gujarati",
+    "French",
+    "Spanish",
+    "Chinese",
+    "Portuguese",
+    "Bengali",
+    "Russian",
+    "Mandarin",
+    "Korean",
+    "Indonesian",
+  ];
+
+  final List<String> _servers = [
+    "Asia",
+    "NorthAmerica",
+    "SouthAmerica",
+    "Europe",
+    "MiddleEast",
+    "Australia",
+  ];
+
   String _selectedGame = "Call of Duty";
+  String _selectedLanguage = "English";
+  String _selectedServer = "Asia";
 
   @override
   void initState() {
@@ -64,6 +93,8 @@ class _PostInvitePageState extends State<PostInvitePage> {
             'join_link': _linkController.text.trim(),
             'username': username,
             'user_id': userId, // Store user ID
+            'language': _selectedLanguage, // Store selected language
+            'server': _selectedServer, // Store selected server
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
@@ -104,6 +135,40 @@ class _PostInvitePageState extends State<PostInvitePage> {
                 onChanged: (value) {
                   setState(() {
                     _selectedGame = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedLanguage,
+                decoration: const InputDecoration(labelText: 'Select Language'),
+                items:
+                    _languages.map((String language) {
+                      return DropdownMenuItem<String>(
+                        value: language,
+                        child: Text(language),
+                      );
+                    }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedLanguage = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedServer,
+                decoration: const InputDecoration(labelText: 'Select Server'),
+                items:
+                    _servers.map((String server) {
+                      return DropdownMenuItem<String>(
+                        value: server,
+                        child: Text(server),
+                      );
+                    }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedServer = value!;
                   });
                 },
               ),
