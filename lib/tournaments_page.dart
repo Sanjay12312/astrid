@@ -65,117 +65,128 @@ class _TournamentPageState extends State<TournamentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Tournaments")),
-      body: Column(
-        children: [
-          // Add "Hosting a Tournament?" section
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                const Text(
-                  "Hosting a Tournament?",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CreateTournamentPage(),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Color(0xFFFFFFFF), // White
+            Color(0xFF076585), // Dark Blue-Green
+          ],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent, // Transparent Scaffold
+        appBar: AppBar(title: const Text("Tournaments")),
+        body: Column(
+          children: [
+            // Add "Hosting a Tournament?" section
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                children: [
+                  const Text(
+                    "Hosting a Tournament?",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateTournamentPage(),
+                        ),
+                      ).then((value) {
+                        if (value == true) {
+                          _fetchTournaments(); // Refresh the tournament list
+                        }
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
                       ),
-                    ).then((value) {
-                      if (value == true) {
-                        _fetchTournaments(); // Refresh the tournament list
-                      }
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    child: const Text(
+                      "Create a Tournament",
+                      style: TextStyle(fontSize: 16),
                     ),
                   ),
-                  child: const Text(
-                    "Create a Tournament",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
 
-          // Render the tournament list
-          Expanded(
-            child:
-                isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : tournaments.isEmpty
-                    ? const Center(
-                      child: Text(
-                        'No tournaments available.',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
-                      ),
-                    )
-                    : ListView.builder(
-                      itemCount: tournaments.length,
-                      itemBuilder: (context, index) {
-                        final tournament = tournaments[index];
-                        final String? imageFileId =
-                            tournament.data['imageFileId'];
-                        final String imageUrl =
-                            imageFileId != null
+            // Render the tournament list
+            Expanded(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : tournaments.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No tournaments available.',
+                            style: TextStyle(color: Colors.grey, fontSize: 16),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: tournaments.length,
+                          itemBuilder: (context, index) {
+                            final tournament = tournaments[index];
+                            final String? imageFileId =
+                                tournament.data['imageFileId'];
+                            final String imageUrl = imageFileId != null
                                 ? _getImageUrl(imageFileId)
                                 : '';
 
-                        return Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.all(8.0),
-                          child: ListTile(
-                            leading:
-                                imageFileId != null
+                            return Card(
+                              elevation: 2,
+                              margin: const EdgeInsets.all(8.0),
+                              child: ListTile(
+                                leading: imageFileId != null
                                     ? Image.network(
-                                      imageUrl,
-                                      width: 60,
-                                      height: 60,
-                                      fit: BoxFit.cover,
-                                    )
+                                        imageUrl,
+                                        width: 60,
+                                        height: 60,
+                                        fit: BoxFit.cover,
+                                      )
                                     : const Icon(Icons.image_not_supported),
-                            title: Text(
-                              tournament.data['T_Name'] ?? 'Unknown Tournament',
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(
-                              'Created by ${tournament.data['user_name'] ?? 'Unknown User'} on '
-                              '${DateTime.parse(tournament.data['Date']).toLocal().toString().split(' ')[0]}',
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => TournamentDetailPage(
+                                title: Text(
+                                  tournament.data['T_Name'] ??
+                                      'Unknown Tournament',
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  'Created by ${tournament.data['user_name'] ?? 'Unknown User'} on '
+                                  '${DateTime.parse(tournament.data['Date']).toLocal().toString().split(' ')[0]}',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          TournamentDetailPage(
                                         tournament: tournament.data,
                                       ),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-          ),
-        ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+            ),
+          ],
+        ),
       ),
     );
   }

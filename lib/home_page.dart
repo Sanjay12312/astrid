@@ -15,38 +15,49 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Astrid")),
-      body:
-          _selectedIndex == 0
-              ? TournamentPage() // Navigate to TournamentsPage for tournaments
-              : _buildGamingPage(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.event),
-            label: "Tournaments",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.videogame_asset),
-            label: "Gaming",
-          ),
-        ],
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Color(0xFFFFFFFF), // White
+            Color(0xFF076585), // Dark Blue-Green
+          ],
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const PostInvitePage()),
-          );
-        },
-        child: const Icon(Icons.add), // "+" icon
+      child: Scaffold(
+        backgroundColor: Colors.transparent, // Transparent Scaffold
+        appBar: AppBar(title: const Text("Astrid")),
+        body:
+            _selectedIndex == 0 ? TournamentPage() : _buildGamingPage(),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            setState(() {
+              _selectedIndex = index;
+            });
+          },
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.event),
+              label: "Tournaments",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.videogame_asset),
+              label: "Gaming",
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PostInvitePage()),
+            );
+          },
+          child: const Icon(Icons.add), // "+" icon
+        ),
       ),
     );
   }

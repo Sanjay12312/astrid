@@ -3,7 +3,7 @@ import 'login_page.dart';
 import 'appwrite_client.dart'; // Ensure this file correctly initializes appwriteClient
 
 void main() {
-  runApp(GroupGamingApp());
+  runApp(const GroupGamingApp());
 }
 
 class GroupGamingApp extends StatelessWidget {
@@ -13,8 +13,35 @@ class GroupGamingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Group Gaming',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: LoginPage(client: appwriteClient), // Ensure LoginPage expects this
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: GradientBackground(child: LoginPage(client: appwriteClient)), // Removed 'const'
+    );
+  }
+}
+
+class GradientBackground extends StatelessWidget {
+  final Widget child;
+  const GradientBackground({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,  // Left to right gradient
+          end: Alignment.centerRight,
+          colors: [
+            Color(0xFFFFFFFF), // White (left side)
+            Color(0xFF076585), // Dark Blue-Green (right side)
+          ],
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent, // Make Scaffold background transparent
+        body: child, // Display the page inside the gradient
+      ),
     );
   }
 }
