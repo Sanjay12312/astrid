@@ -31,7 +31,26 @@ class _PostInvitePageState extends State<PostInvitePage> {
     "Ludo",
   ];
 
+  final List<String> _languages = [
+    "English",
+    "Malayalam",
+    "Hindi",
+    "Tamil",
+    "Telugu",
+    "Gujarati",
+    "French",
+    "Spanish",
+    "Chinese",
+    "Portuguese",
+    "Bengali",
+    "Russian",
+    "Mandarin",
+    "Korean",
+    "Indonesian",
+  ];
+
   String _selectedGame = "Call of Duty";
+  String _selectedLanguage = "English";
 
   @override
   void initState() {
@@ -64,6 +83,7 @@ class _PostInvitePageState extends State<PostInvitePage> {
             'join_link': _linkController.text.trim(),
             'username': username,
             'user_id': userId, // Store user ID
+            'language': _selectedLanguage, // Store selected language
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
@@ -104,6 +124,23 @@ class _PostInvitePageState extends State<PostInvitePage> {
                 onChanged: (value) {
                   setState(() {
                     _selectedGame = value!;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _selectedLanguage,
+                decoration: const InputDecoration(labelText: 'Select Language'),
+                items:
+                    _languages.map((String language) {
+                      return DropdownMenuItem<String>(
+                        value: language,
+                        child: Text(language),
+                      );
+                    }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedLanguage = value!;
                   });
                 },
               ),
